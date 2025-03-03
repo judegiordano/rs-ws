@@ -10,22 +10,24 @@ const ws = new WebSocket('ws://0.0.0.0:80');
 ws.on('open', function open() {
     for (let index = 0; index < 20; index++) {
         if (index % 2 === 0) {
-            const ping = { ok: true };
+            const ping = { ping: true };
             // Serialize the coordinates to JSON and convert to a binary format
             const json_data = JSON.stringify(ping);
             const json_bytes = Buffer.from(json_data, 'utf8');
             // coordinates identifier
-            const msg = Buffer.concat([Buffer.from([0]), json_bytes]);
+            const msg = Buffer.concat([Buffer.from([1]), json_bytes]);
+            console.log('Sent Ping:', msg);
             ws.send(msg);
             continue
         }
-        const coordinates = { x: 0, y: index };
+        const coordinates = { x: index + 1, y: index };
         // Serialize the coordinates to JSON and convert to a binary format
         const json_data = JSON.stringify(coordinates);
         const json_bytes = Buffer.from(json_data, 'utf8');
 
         // coordinates identifier
         const msg = Buffer.concat([Buffer.from([0]), json_bytes]);
+        console.log('Sent Coord:', msg);
         ws.send(msg);
     }
     ws.close()

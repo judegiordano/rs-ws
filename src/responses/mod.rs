@@ -1,22 +1,24 @@
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 
 pub mod error_message;
 
 #[derive(Debug, Deserialize)]
 pub enum ResponseType {
-    CoordinatesOk = 0,
-    Err,
+    Err = 0,
+    CoordinatesOk,
+    Pong,
 }
 
 impl ResponseType {
     pub fn as_byte(&self) -> u8 {
         match self {
-            ResponseType::CoordinatesOk => 0,
-            ResponseType::Err => 1,
+            ResponseType::Err => 0,
+            ResponseType::CoordinatesOk => 1,
+            ResponseType::Pong => 2,
         }
     }
 }
 
-pub trait ToResponse<T: Serialize>: Serialize {
+pub trait ToResponse {
     fn as_bytes(&self) -> Result<Vec<u8>, serde_json::Error>;
 }

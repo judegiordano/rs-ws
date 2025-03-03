@@ -1,8 +1,8 @@
-use commands::coordinates::Coordinates;
+use commands::{coordinates::Coordinates, ping::Ping, MessageHandler};
 use futures_util::{SinkExt, StreamExt};
 use message_bytes::MessageBytes;
 use message_type::MessageType;
-use responses::{error_message::ErrorMessage, ToResponse};
+use responses::error_message::ErrorMessage;
 use std::{net::SocketAddr, time::Duration};
 use tokio::net::{TcpListener, TcpStream};
 use tokio_tungstenite::{
@@ -22,12 +22,14 @@ async fn message_handler(msg: Message) -> Result<Message> {
     let msg_type = msg_bytes.message_type();
     let data = msg_bytes.message_body();
     // handle each type of message type
-    let response = match msg_type {
-        MessageType::Coordinates => Coordinates::message_handler(data),
-        MessageType::Unhandled => ErrorMessage::message_handler(),
-    };
-    let data = response.unwrap();
     tokio::time::sleep(Duration::from_millis(0)).await;
+    let response = match msg_type {
+        MessageType::Coordinates => Coordinates::response_handler(data),
+        MessageType::Ping => Ping::response_handler(data),
+        _ => ErrorMessage::response_handler(data),
+    };
+    // TODO: handle
+    let data = response.unwrap().as_bytes().unwrap();
     Ok(Message::binary(data))
 }
 

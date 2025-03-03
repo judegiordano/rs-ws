@@ -1,13 +1,16 @@
-use serde::Serialize;
+use anyhow::Result;
+use serde::{Deserialize, Serialize};
+
+use crate::commands::MessageHandler;
 
 use super::{ResponseType, ToResponse};
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct ErrorMessage {
     pub message: String,
 }
 
-impl ToResponse<ErrorMessage> for ErrorMessage {
+impl ToResponse for ErrorMessage {
     fn as_bytes(&self) -> Result<Vec<u8>, serde_json::Error> {
         let signature = ResponseType::Err;
         let mut msg = vec![signature.as_byte()];
@@ -17,12 +20,11 @@ impl ToResponse<ErrorMessage> for ErrorMessage {
     }
 }
 
-impl ErrorMessage {
-    pub fn message_handler() -> Result<Vec<u8>, serde_json::Error> {
+impl MessageHandler<ErrorMessage> for ErrorMessage {
+    fn response_handler(_: &[u8]) -> Result<Box<dyn ToResponse>> {
         tracing::debug!("[UNHANDLED]");
-        let err = ErrorMessage {
+        Ok(Box::new(ErrorMessage {
             message: "unknown command".to_string(),
-        };
-        Ok(err.as_bytes()?)
+        }))
     }
 }

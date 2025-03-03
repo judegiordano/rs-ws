@@ -1,6 +1,7 @@
+use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
-use crate::responses::{error_message::ErrorMessage, ResponseType, ToResponse};
+use crate::responses::{ResponseType, ToResponse};
 
 use super::MessageHandler;
 
@@ -15,7 +16,7 @@ pub struct CoordinatesOk {
     pub ok: bool,
 }
 
-impl ToResponse<CoordinatesOk> for CoordinatesOk {
+impl ToResponse for CoordinatesOk {
     fn as_bytes(&self) -> Result<Vec<u8>, serde_json::Error> {
         let signature = ResponseType::CoordinatesOk;
         let mut msg = vec![signature.as_byte()];
@@ -25,24 +26,10 @@ impl ToResponse<CoordinatesOk> for CoordinatesOk {
     }
 }
 
-impl MessageHandler<Coordinates> for Coordinates {}
-
-impl Coordinates {
-    pub fn message_handler(data: &[u8]) -> Result<Vec<u8>, serde_json::Error> {
-        let bytes = match Coordinates::parse_from_slice(data) {
-            Ok(cords) => {
-                tracing::debug!("[COORDINATES]: [{:?}]", cords);
-                let response = CoordinatesOk { ok: true };
-                response.as_bytes()
-            }
-            Err(err) => {
-                tracing::error!("[COORDINATES ERROR]: [{:?}]", err);
-                let response = ErrorMessage {
-                    message: err.to_string(),
-                };
-                response.as_bytes()
-            }
-        };
-        Ok(bytes?)
+impl MessageHandler<Coordinates> for Coordinates {
+    fn response_handler(data: &[u8]) -> Result<Box<dyn ToResponse>> {
+        let response = Self::parse_from_slice(data)?;
+        tracing::debug!("[COORDINATES]: [{:?}]", response);
+        Ok(Box::new(CoordinatesOk { ok: true }))
     }
 }
