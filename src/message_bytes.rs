@@ -1,6 +1,6 @@
 use tokio_tungstenite::tungstenite::Bytes;
 
-use crate::message_type::MessageType;
+use crate::message_type::RequestType;
 
 pub struct MessageBytes(pub Bytes);
 
@@ -9,8 +9,8 @@ impl MessageBytes {
         self.0[0]
     }
 
-    pub fn message_type(&self) -> MessageType {
-        MessageType::from_byte(self.first_byte())
+    pub fn message_type(&self) -> RequestType {
+        RequestType::from_byte(self.first_byte())
     }
 
     pub fn message_body(&self) -> &[u8] {

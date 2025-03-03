@@ -1,8 +1,8 @@
 use commands::{coordinates::Coordinates, ping::Ping, MessageHandler};
 use futures_util::{SinkExt, StreamExt};
 use message_bytes::MessageBytes;
-use message_type::MessageType;
-use responses::error_message::ErrorMessage;
+use message_type::RequestType;
+use responses::{error_message::ErrorMessage, Response};
 use std::{net::SocketAddr, time::Duration};
 use tokio::net::{TcpListener, TcpStream};
 use tokio_tungstenite::{
@@ -21,16 +21,28 @@ async fn message_handler(msg: Message) -> Result<Message> {
     let msg_bytes = MessageBytes(msg.into_data());
     let msg_type = msg_bytes.message_type();
     let data = msg_bytes.message_body();
-    // handle each type of message type
-    tokio::time::sleep(Duration::from_millis(0)).await;
-    let response = match msg_type {
-        MessageType::Coordinates => Coordinates::response_handler(data),
-        MessageType::Ping => Ping::response_handler(data),
+    // TODO: remove
+    tokio::time::sleep(Duration::from_millis(60)).await;
+    let handler = match msg_type {
+        RequestType::Coordinates => Coordinates::response_handler(data),
+        RequestType::Ping => Ping::response_handler(data),
         _ => ErrorMessage::response_handler(data),
     };
     // TODO: handle
-    let data = response.unwrap().as_bytes().unwrap();
-    Ok(Message::binary(data))
+    let buffer = match handler {
+        Ok(response) => response.build_response(),
+        Err(err) => {
+            // TODO: refactor
+            tracing::error!("[{:?}]: [{:?}]", msg_type, data);
+            tracing::error!("[ERROR BUILDING RESPONSE] {:?}", err);
+            let err = ErrorMessage {
+                message: err.to_string(),
+            };
+            Response::Error(err).build_response()
+        }
+    };
+    // let response = handler.unwrap().build_response();
+    Ok(Message::binary(buffer))
 }
 
 async fn handle_connection(_: SocketAddr, stream: TcpStream) -> Result<()> {

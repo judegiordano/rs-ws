@@ -6,9 +6,37 @@ const ws = new WebSocket('ws://0.0.0.0:80');
 // Create a binary message with the type identifier (0 for coordinates)
 // const msg = Buffer.concat([Buffer.from([0]), json_bytes]);
 
+const SIGNATURES = {
+    COORDINATES: 0,
+    PING: 1
+}
+
 // Send the binary message when the connection is open
 ws.on('open', function open() {
-    for (let index = 0; index < 20; index++) {
+    for (let index = 0; index < 100; index++) {
+        if (index === 10) {
+            const ping = { ping: 1 };
+            // Serialize the coordinates to JSON and convert to a binary format
+            const json_data = JSON.stringify(ping);
+            const json_bytes = Buffer.from(json_data, 'utf8');
+            // coordinates identifier
+            const msg = Buffer.concat([Buffer.from([1]), json_bytes]);
+            console.log('Sent bad data:', msg);
+            ws.send(msg);
+            continue
+        }
+        if (index === 19) {
+            const ping = { blah: 1 };
+            // Serialize the coordinates to JSON and convert to a binary format
+            const json_data = JSON.stringify(ping);
+            const json_bytes = Buffer.from(json_data, 'utf8');
+            // coordinates identifier
+            const msg = Buffer.concat([Buffer.from([10]), json_bytes]);
+            console.log('Sent bad:', msg);
+            ws.send(msg);
+            continue
+        }
+
         if (index % 2 === 0) {
             const ping = { ping: true };
             // Serialize the coordinates to JSON and convert to a binary format
@@ -36,7 +64,9 @@ ws.on('open', function open() {
 
 // Log any messages received from the server
 ws.on('message', function incoming(data) {
-    console.log('Received:', data);
+    const json_data = data.slice(1).toString('utf8');
+    const response = JSON.parse(json_data);
+    console.log({ signature: data[0], response });
 });
 
 // Handle errors
