@@ -1,9 +1,14 @@
-use commands::{coordinates::Coordinates, ping::Ping, MessageHandler};
+use commands::{
+    coordinates::Coordinates,
+    ping::Ping,
+    room::{create_room::CreateRoom, join_room::JoinRoom, read_room::ReadRoom},
+    MessageHandler,
+};
 use futures_util::{SinkExt, StreamExt};
 use message_bytes::MessageBytes;
 use message_type::RequestType;
 use responses::{error_message::ErrorMessage, Response};
-use std::{net::SocketAddr, time::Duration};
+use std::net::SocketAddr;
 use tokio::net::{TcpListener, TcpStream};
 use tokio_tungstenite::{
     accept_async,
@@ -16,17 +21,21 @@ mod commands;
 mod message_bytes;
 mod message_type;
 mod responses;
+mod session;
 
 async fn message_handler(msg: Message) -> Result<Message> {
     let msg_bytes = MessageBytes(msg.into_data());
     let msg_type = msg_bytes.message_type();
     let data = msg_bytes.message_body();
-    // TODO: remove
-    tokio::time::sleep(Duration::from_millis(60)).await;
     let handler = match msg_type {
-        RequestType::Coordinates => Coordinates::response_handler(data),
-        RequestType::Ping => Ping::response_handler(data),
-        _ => ErrorMessage::response_handler(data),
+        RequestType::Coordinates => Coordinates::response_handler(data).await,
+        RequestType::Ping => Ping::response_handler(data).await,
+        // rooms
+        RequestType::JoinRoom => JoinRoom::response_handler(data).await,
+        RequestType::CreateRoom => CreateRoom::response_handler(data).await,
+        RequestType::ReadRoom => ReadRoom::response_handler(data).await,
+        // unhandled
+        _ => ErrorMessage::response_handler(data).await,
     };
     // TODO: handle
     let buffer = match handler {

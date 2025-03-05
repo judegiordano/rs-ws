@@ -19,7 +19,7 @@ pub struct CoordinatesOk {
 impl ToResponse for CoordinatesOk {}
 
 impl MessageHandler<Coordinates> for Coordinates {
-    fn response_handler(data: &[u8]) -> Result<Response> {
+    async fn response_handler(data: &[u8]) -> Result<Response> {
         let response = Self::parse_from_slice(data)?;
         tracing::debug!("[COORDINATES]: [{:?}]", response);
         Ok(Response::CoordinatesOk(CoordinatesOk { ok: true }))

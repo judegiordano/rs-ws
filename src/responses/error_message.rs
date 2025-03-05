@@ -13,7 +13,7 @@ pub struct ErrorMessage {
 impl ToResponse for ErrorMessage {}
 
 impl MessageHandler<ErrorMessage> for ErrorMessage {
-    fn response_handler(_: &[u8]) -> Result<Response> {
+    async fn response_handler(_: &[u8]) -> Result<Response> {
         tracing::warn!("[UNHANDLED COMMAND]");
         Ok(Response::Error(ErrorMessage {
             message: "unhandled command".to_string(),

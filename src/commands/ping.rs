@@ -17,7 +17,7 @@ pub struct Pong {
 }
 
 impl MessageHandler<Ping> for Ping {
-    fn response_handler(data: &[u8]) -> Result<Response> {
+    async fn response_handler(data: &[u8]) -> Result<Response> {
         let response = Self::parse_from_slice(data)?;
         tracing::debug!("[PING]: [{:?}]", response);
         Ok(Response::Pong(Pong { pong: true }))

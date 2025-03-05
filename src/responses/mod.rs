@@ -1,7 +1,14 @@
 use error_message::ErrorMessage;
 use serde::Serialize;
 
-use crate::commands::{coordinates::CoordinatesOk, ping::Pong};
+use crate::{
+    commands::{
+        coordinates::CoordinatesOk,
+        ping::Pong,
+        room::response::{CreateRoomSuccess, JoinRoomSuccess},
+    },
+    session::Room,
+};
 
 pub mod error_message;
 
@@ -16,6 +23,9 @@ pub enum Response {
     Error(ErrorMessage),
     CoordinatesOk(CoordinatesOk),
     Pong(Pong),
+    JoinRoomSuccess(JoinRoomSuccess),
+    CreateRoomSuccess(CreateRoomSuccess),
+    ReadRoomSuccess(Room),
 }
 
 impl Response {
@@ -24,6 +34,9 @@ impl Response {
             Self::Error(_) => 0,
             Self::CoordinatesOk(_) => 1,
             Self::Pong(_) => 2,
+            Self::JoinRoomSuccess(_) => 3,
+            Self::CreateRoomSuccess(_) => 4,
+            Self::ReadRoomSuccess(_) => 5,
         }
     }
 
@@ -32,6 +45,9 @@ impl Response {
             Self::Error(data) => data.as_bytes(),
             Self::CoordinatesOk(data) => data.as_bytes(),
             Self::Pong(data) => data.as_bytes(),
+            Self::JoinRoomSuccess(data) => data.as_bytes(),
+            Self::CreateRoomSuccess(data) => data.as_bytes(),
+            Self::ReadRoomSuccess(data) => data.as_bytes(),
         }
     }
 
