@@ -4,7 +4,7 @@ use serde::Serialize;
 use crate::{
     commands::{
         coordinates::CoordinatesOk,
-        ping::Pong,
+        health::ping::Pong,
         room::response::{CreateRoomSuccess, JoinRoomSuccess},
     },
     state::room::SanitizedRoom,

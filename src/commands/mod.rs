@@ -4,7 +4,7 @@ use serde::{de::DeserializeOwned, Serialize};
 use crate::responses::Response;
 
 pub mod coordinates;
-pub mod ping;
+pub mod health;
 pub mod room;
 
 pub trait MessageHandler: Serialize + DeserializeOwned {

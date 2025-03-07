@@ -1,9 +1,10 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
-use crate::responses::{Response, ToResponse};
-
-use super::MessageHandler;
+use crate::{
+    commands::MessageHandler,
+    responses::{Response, ToResponse},
+};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Ping {
