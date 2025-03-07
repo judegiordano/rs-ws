@@ -7,7 +7,7 @@ use crate::{
         ping::Pong,
         room::response::{CreateRoomSuccess, JoinRoomSuccess},
     },
-    session::Room,
+    session::SanitizedRoom,
 };
 
 pub mod error_message;
@@ -25,7 +25,7 @@ pub enum Response {
     Pong(Pong),
     JoinRoomSuccess(JoinRoomSuccess),
     CreateRoomSuccess(CreateRoomSuccess),
-    ReadRoomSuccess(Room),
+    ReadRoomSuccess(SanitizedRoom),
 }
 
 impl Response {
@@ -58,5 +58,11 @@ impl Response {
         let body = self.response_body().unwrap();
         data.extend(body);
         data
+    }
+
+    pub fn error(message: &str) -> Response {
+        Self::Error(ErrorMessage {
+            message: message.to_string(),
+        })
     }
 }

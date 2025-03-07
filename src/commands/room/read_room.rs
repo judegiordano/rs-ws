@@ -12,6 +12,7 @@ use crate::{
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ReadRoom {
     pub room_id: String,
+    pub player_id: String,
 }
 
 impl MessageHandler<ReadRoom> for ReadRoom {
@@ -19,16 +20,18 @@ impl MessageHandler<ReadRoom> for ReadRoom {
         let data = Self::parse_from_slice(data)?;
         tracing::debug!("[READ ROOM]: [{:?}]", data);
         let state = STATE.lock().await;
-        let id = Uuid::from_str(&data.room_id)?;
-        let room = match state.get(&id) {
-            Some(room) => room.to_owned(),
-            None => {
-                return Ok(Response::Error(ErrorMessage {
-                    message: format!("room {id} not found"),
-                }))
-            }
+        let room_id = Uuid::from_str(&data.room_id)?;
+        let room = match state.get(&room_id) {
+            Some(room) => room,
+            None => return Ok(Response::error("room not found")),
         };
+        let id = Uuid::from_str(&data.player_id)?;
+        if !room.players.contains_key(&id) {
+            return Ok(Response::Error(ErrorMessage {
+                message: format!("you do not have access to this room"),
+            }));
+        }
         tracing::debug!("[ROOM {id}]: {:#?}", room);
-        Ok(Response::ReadRoomSuccess(room))
+        Ok(Response::ReadRoomSuccess(room.sanitize()))
     }
 }

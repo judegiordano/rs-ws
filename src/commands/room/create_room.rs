@@ -1,7 +1,6 @@
-use std::collections::BTreeMap;
-
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeMap;
 use uuid::Uuid;
 
 use crate::{
@@ -22,15 +21,14 @@ impl MessageHandler<CreateRoom> for CreateRoom {
         // TODO: check if room exists;
         let id = Uuid::new_v4();
         let mut state = STATE.lock().await;
-        let players = BTreeMap::new();
         let room = Room {
             id,
             name: data.name.to_string(),
-            players,
+            players: BTreeMap::new(),
         };
         state.insert(id, room);
         Ok(Response::CreateRoomSuccess(CreateRoomSuccess {
-            id: id.to_string(),
+            room_id: id.to_string(),
             name: data.name,
         }))
     }

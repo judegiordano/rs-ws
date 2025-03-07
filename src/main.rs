@@ -17,6 +17,7 @@ use tokio_tungstenite::{
 use tracing::Level;
 use tracing_subscriber::FmtSubscriber;
 
+mod auth;
 mod commands;
 mod message_bytes;
 mod message_type;

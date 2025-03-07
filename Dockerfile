@@ -2,7 +2,7 @@ FROM rust:slim AS chef
 
 # install build tools
 RUN apt-get update -y && \
-    apt-get install -y pkg-config make g++ libssl-dev && \
+    apt-get install -y pkg-config make g++ libssl-dev musl-tools && \
     rustup target add x86_64-unknown-linux-musl
 
 # add cargo chef (this installs only once on first build)

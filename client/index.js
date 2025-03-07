@@ -64,6 +64,8 @@ const SIGNATURES = {
 // });
 
 ws.on('open', function open() {
+    const room = '5ddeea0e-2612-4eb2-b937-26204f437c2b'
+    const player = '03c37088-fb9e-45ec-8f67-0116ae8a7155'
     function createRoom() {
         const now = Date.now()
         const data = { name: `my test room ${now}` };
@@ -76,15 +78,26 @@ ws.on('open', function open() {
 
     function joinRoom() {
         const now = Date.now()
-        const data = { room_id: '2d8ec11f-6cf8-44ef-a2d4-c6c6f3543621', display_name: `my username ${now}` };
+        const data = { room_id: room, display_name: `my username ${now}` };
         const json_data = JSON.stringify(data);
         const json_bytes = Buffer.from(json_data, 'utf8');
         const msg = Buffer.concat([Buffer.from([2]), json_bytes]);
         console.log('SENT', msg.toString('hex').match(/../g).join(' '));
         ws.send(msg);
     }
+
+    function readRoom() {
+        const now = Date.now()
+        const data = { room_id: room, player_id: player };
+        const json_data = JSON.stringify(data);
+        const json_bytes = Buffer.from(json_data, 'utf8');
+        const msg = Buffer.concat([Buffer.from([4]), json_bytes]);
+        console.log('SENT', msg.toString('hex').match(/../g).join(' '));
+        ws.send(msg);
+    }
     // createRoom()
-    joinRoom()
+    // joinRoom()
+    readRoom()
     ws.close()
 });
 
@@ -92,7 +105,7 @@ ws.on('open', function open() {
 ws.on('message', function incoming(data) {
     const json_data = data.slice(1).toString('utf8');
     const response = JSON.parse(json_data);
-    console.log({ signature: data[0], response });
+    console.dir({ signature: data[0], response }, { depth: 10 });
 });
 
 // Handle errors

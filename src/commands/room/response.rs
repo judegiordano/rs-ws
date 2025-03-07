@@ -4,12 +4,12 @@ use crate::responses::ToResponse;
 
 #[derive(Debug, Serialize)]
 pub struct JoinRoomSuccess {
-    pub ok: bool,
+    pub player_id: String,
 }
 
 #[derive(Debug, Serialize)]
 pub struct CreateRoomSuccess {
-    pub id: String,
+    pub room_id: String,
     pub name: String,
 }
 
