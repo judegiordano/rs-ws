@@ -64,8 +64,8 @@ const SIGNATURES = {
 // });
 
 ws.on('open', function open() {
-    const room = '5ddeea0e-2612-4eb2-b937-26204f437c2b'
-    const player = '03c37088-fb9e-45ec-8f67-0116ae8a7155'
+    const room = '21f1bb80-7ac3-4e8f-9a01-03abae19c74e'
+    const player = 'e10221b3-f368-4efd-9cb3-35de4fdd3733'
     function createRoom() {
         const now = Date.now()
         const data = { name: `my test room ${now}` };
@@ -96,8 +96,8 @@ ws.on('open', function open() {
         ws.send(msg);
     }
     // createRoom()
-    // joinRoom()
     readRoom()
+    // joinRoom()
     ws.close()
 });
 

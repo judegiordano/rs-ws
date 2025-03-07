@@ -6,7 +6,7 @@ use uuid::Uuid;
 use crate::{
     commands::{room::response::JoinRoomSuccess, MessageHandler},
     responses::Response,
-    session::{Player, STATE},
+    state::{player::Player, session::STATE},
 };
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -15,7 +15,7 @@ pub struct JoinRoom {
     pub display_name: String,
 }
 
-impl MessageHandler<JoinRoom> for JoinRoom {
+impl MessageHandler for JoinRoom {
     async fn response_handler(data: &[u8]) -> Result<Response> {
         let data = Self::parse_from_slice(data)?;
         tracing::debug!("[JOIN ROOM]: [{:?}]", data);
@@ -25,7 +25,7 @@ impl MessageHandler<JoinRoom> for JoinRoom {
             Some(room) => room,
             None => return Ok(Response::error("room not found")),
         };
-        if !room.has_capacity() {
+        if room.is_full() {
             return Ok(Response::error("room is full"));
         }
         let player_id = Uuid::new_v4();
@@ -37,8 +37,6 @@ impl MessageHandler<JoinRoom> for JoinRoom {
             },
         );
         tracing::debug!("[ROOM {room_id}]: {:#?}", room);
-        Ok(Response::JoinRoomSuccess(JoinRoomSuccess {
-            player_id: player_id.to_string(),
-        }))
+        Ok(Response::JoinRoomSuccess(JoinRoomSuccess { player_id }))
     }
 }

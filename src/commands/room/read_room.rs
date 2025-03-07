@@ -6,7 +6,7 @@ use uuid::Uuid;
 use crate::{
     commands::MessageHandler,
     responses::{error_message::ErrorMessage, Response},
-    session::STATE,
+    state::session::STATE,
 };
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -15,7 +15,7 @@ pub struct ReadRoom {
     pub player_id: String,
 }
 
-impl MessageHandler<ReadRoom> for ReadRoom {
+impl MessageHandler for ReadRoom {
     async fn response_handler(data: &[u8]) -> Result<Response> {
         let data = Self::parse_from_slice(data)?;
         tracing::debug!("[READ ROOM]: [{:?}]", data);

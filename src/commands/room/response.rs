@@ -1,15 +1,16 @@
 use serde::Serialize;
+use uuid::Uuid;
 
 use crate::responses::ToResponse;
 
 #[derive(Debug, Serialize)]
 pub struct JoinRoomSuccess {
-    pub player_id: String,
+    pub player_id: Uuid,
 }
 
 #[derive(Debug, Serialize)]
 pub struct CreateRoomSuccess {
-    pub room_id: String,
+    pub room_id: Uuid,
     pub name: String,
 }
 

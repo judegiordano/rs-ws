@@ -22,7 +22,7 @@ mod commands;
 mod message_bytes;
 mod message_type;
 mod responses;
-mod session;
+mod state;
 
 async fn message_handler(msg: Message) -> Result<Message> {
     let msg_bytes = MessageBytes(msg.into_data());

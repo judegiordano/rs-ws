@@ -6,7 +6,7 @@ use uuid::Uuid;
 use crate::{
     commands::{room::response::CreateRoomSuccess, MessageHandler},
     responses::Response,
-    session::{Room, STATE},
+    state::{room::Room, session::STATE},
 };
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -14,7 +14,7 @@ pub struct CreateRoom {
     pub name: String,
 }
 
-impl MessageHandler<CreateRoom> for CreateRoom {
+impl MessageHandler for CreateRoom {
     async fn response_handler(data: &[u8]) -> Result<Response> {
         let data = Self::parse_from_slice(data)?;
         tracing::debug!("[CREATE ROOM]: [{:?}]", data);
@@ -28,7 +28,7 @@ impl MessageHandler<CreateRoom> for CreateRoom {
         };
         state.insert(id, room);
         Ok(Response::CreateRoomSuccess(CreateRoomSuccess {
-            room_id: id.to_string(),
+            room_id: id,
             name: data.name,
         }))
     }

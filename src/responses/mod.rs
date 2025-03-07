@@ -7,7 +7,7 @@ use crate::{
         ping::Pong,
         room::response::{CreateRoomSuccess, JoinRoomSuccess},
     },
-    session::SanitizedRoom,
+    state::room::SanitizedRoom,
 };
 
 pub mod error_message;
@@ -60,7 +60,7 @@ impl Response {
         data
     }
 
-    pub fn error(message: &str) -> Response {
+    pub fn error<'b>(message: &str) -> Response {
         Self::Error(ErrorMessage {
             message: message.to_string(),
         })

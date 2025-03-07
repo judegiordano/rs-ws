@@ -30,6 +30,7 @@ impl Default for Claims {
     }
 }
 
+#[allow(dead_code)]
 impl Claims {
     pub fn sign(&self) -> Result<String> {
         Ok(encode(
