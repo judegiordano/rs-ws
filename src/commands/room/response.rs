@@ -14,5 +14,11 @@ pub struct CreateRoomSuccess {
     pub name: String,
 }
 
+#[derive(Debug, Serialize)]
+pub struct RoomBroadcast {
+    pub message: String,
+}
+
 impl ToResponse for JoinRoomSuccess {}
 impl ToResponse for CreateRoomSuccess {}
+impl ToResponse for RoomBroadcast {}

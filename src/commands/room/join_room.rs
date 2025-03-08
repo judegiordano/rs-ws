@@ -33,15 +33,17 @@ impl MessageHandler for JoinRoom {
             return Ok(Response::error("room is full"));
         }
         let player_id = Uuid::new_v4();
+        let username = data.display_name;
         room.players.insert(
             player_id,
             Player {
                 id: room_id,
                 session: receiver.clone(),
-                display_name: data.display_name,
+                display_name: username.to_string(),
             },
         );
         tracing::debug!("[ROOM]: {:#?}", room);
+        room.broadcast(format!("{:?} has joined.", username)).await;
         Ok(Response::JoinRoomSuccess(JoinRoomSuccess { player_id }))
     }
 }

@@ -5,7 +5,7 @@ use crate::{
     commands::{
         coordinates::CoordinatesOk,
         health::ping::Pong,
-        room::response::{CreateRoomSuccess, JoinRoomSuccess},
+        room::response::{CreateRoomSuccess, JoinRoomSuccess, RoomBroadcast},
     },
     state::room::SanitizedRoom,
 };
@@ -26,6 +26,7 @@ pub enum Response {
     JoinRoomSuccess(JoinRoomSuccess),
     CreateRoomSuccess(CreateRoomSuccess),
     ReadRoomSuccess(SanitizedRoom),
+    RoomBroadcast(RoomBroadcast),
 }
 
 impl Response {
@@ -37,6 +38,7 @@ impl Response {
             Self::JoinRoomSuccess(_) => 3,
             Self::CreateRoomSuccess(_) => 4,
             Self::ReadRoomSuccess(_) => 5,
+            Self::RoomBroadcast(_) => 6,
         }
     }
 
@@ -48,6 +50,7 @@ impl Response {
             Self::JoinRoomSuccess(data) => data.as_bytes(),
             Self::CreateRoomSuccess(data) => data.as_bytes(),
             Self::ReadRoomSuccess(data) => data.as_bytes(),
+            Self::RoomBroadcast(data) => data.as_bytes(),
         }
     }
 

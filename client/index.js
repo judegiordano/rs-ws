@@ -64,7 +64,7 @@ const SIGNATURES = {
 // });
 
 ws.on('open', function open() {
-    const room = '796d0966-29f6-453b-9ffd-c526d4448c48'
+    const room = '2984c405-dd1a-4721-938c-790e7656a721'
     const player = '81c2efa9-a9d8-427d-8899-68550bd7f81e'
     function createRoom() {
         const now = Date.now()
@@ -96,8 +96,8 @@ ws.on('open', function open() {
         ws.send(msg);
     }
     // createRoom()
-    readRoom()
-    // joinRoom()
+    // readRoom()
+    joinRoom()
     ws.close()
 });
 

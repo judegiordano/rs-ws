@@ -1,9 +1,14 @@
+use futures_util::SinkExt;
 use serde::Serialize;
 use std::collections::BTreeMap;
+use tokio_tungstenite::tungstenite::Message;
 use uuid::Uuid;
 
 use super::player::{Player, SanitizedPlayer};
-use crate::responses::ToResponse;
+use crate::{
+    commands::room::response::RoomBroadcast,
+    responses::{Response, ToResponse},
+};
 
 pub type PlayerMap = BTreeMap<Uuid, Player>;
 
@@ -44,5 +49,19 @@ impl Room {
 
     pub fn is_full(&self) -> bool {
         self.players.len() == MAX_ROOM_CAPACITY
+    }
+
+    pub async fn broadcast(&self, message: String) {
+        let buffer = Response::RoomBroadcast(RoomBroadcast { message }).build_response();
+        let msg = Message::binary(buffer);
+        for (_, player) in &self.players {
+            let client = &mut player.session.lock().await;
+            match client.send(msg.clone()).await {
+                Ok(_) => (),
+                Err(err) => {
+                    tracing::error!("[BROADCAST ERROR]: {:?}", err);
+                }
+            }
+        }
     }
 }
