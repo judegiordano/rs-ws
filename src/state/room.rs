@@ -51,7 +51,7 @@ impl Room {
         self.players.len() == MAX_ROOM_CAPACITY
     }
 
-    pub async fn broadcast(&self, message: String) {
+    pub async fn broadcast(&mut self, message: String) {
         let buffer = Response::RoomBroadcast(RoomBroadcast { message }).build_response();
         let msg = Message::binary(buffer);
         for (_, player) in &self.players {

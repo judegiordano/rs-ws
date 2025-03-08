@@ -14,7 +14,10 @@ use tracing_subscriber::FmtSubscriber;
 use crate::{
     commands::{
         health::ping::Ping,
-        room::{create_room::CreateRoom, join_room::JoinRoom, read_room::ReadRoom},
+        room::{
+            create_room::CreateRoom, join_room::JoinRoom, leave_room::LeaveRoom,
+            read_room::ReadRoom,
+        },
         MessageHandler,
     },
     message_bytes::MessageBytes,
@@ -37,6 +40,7 @@ async fn message_handler(
         RequestType::JoinRoom => JoinRoom::response_handler(data, receiver).await,
         RequestType::CreateRoom => CreateRoom::response_handler(data, receiver).await,
         RequestType::ReadRoom => ReadRoom::response_handler(data, receiver).await,
+        RequestType::LeaveRoom => LeaveRoom::response_handler(data, receiver).await,
         // unhandled
         _ => ErrorMessage::response_handler(data, receiver).await,
     };

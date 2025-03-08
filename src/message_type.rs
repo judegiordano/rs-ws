@@ -7,6 +7,7 @@ pub enum RequestType {
     CreateRoom = 1,
     JoinRoom = 2,
     ReadRoom = 3,
+    LeaveRoom = 4,
     //
     Unhandled,
 }
@@ -18,6 +19,7 @@ impl RequestType {
             1 => Self::CreateRoom,
             2 => Self::JoinRoom,
             3 => Self::ReadRoom,
+            4 => Self::LeaveRoom,
             //
             _ => Self::Unhandled,
         }

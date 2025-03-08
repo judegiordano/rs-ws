@@ -32,12 +32,14 @@ impl MessageHandler for JoinRoom {
         if room.is_full() {
             return Ok(Response::error("room is full"));
         }
+        // TODO: provide optional player_id and attempt to rejoin as the same player
+        // otherwise a new player is inserted on every connection
         let player_id = Uuid::new_v4();
         let username = data.display_name;
         room.players.insert(
             player_id,
             Player {
-                id: room_id,
+                id: player_id,
                 session: receiver.clone(),
                 display_name: username.to_string(),
             },

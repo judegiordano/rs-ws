@@ -1,5 +1,5 @@
 'use client'
-import { RequestSignature } from "@/types/request";
+import { RequestSignature, ResponseSignature } from "@/types/request";
 import { useEffect, useState } from "react";
 
 export const useSocket = (url: string) => {
@@ -13,12 +13,13 @@ export const useSocket = (url: string) => {
         return Buffer.concat([reqSignature, json_bytes]);
     }
 
-    async function fromBinary<T>(event: MessageEvent<Blob>): Promise<T> {
+    async function fromBinary<T>(event: MessageEvent<Blob>): Promise<[ResponseSignature, T]> {
         const data = event.data
-        const signature = await data.slice(0, 1).text()
+        const asciSignature = await data.slice(0, 1).text()
+        const signature = asciSignature.charCodeAt(0);
         console.log({ signature });
         const body = await data.slice(1).text()
-        return JSON.parse(body)
+        return [signature, JSON.parse(body)]
     }
 
     useEffect(() => {

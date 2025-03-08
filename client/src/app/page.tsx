@@ -2,12 +2,13 @@
 import { useEffect, useState } from 'react';
 
 import { useSocket } from '@/hooks/useWebsocket';
-import { RequestSignature } from '@/types/request';
+import { RequestSignature, ResponseSignature } from '@/types/request';
 
 export default function Home() {
   const { socket, isConnecting, toBinary, fromBinary } = useSocket('ws://localhost:80')
   const [messages, setMessages] = useState<string[]>([])
   const [roomId, setRoomId] = useState('')
+  const [playerId, setPLayerId] = useState('')
 
   async function createRoom() {
     const msg = toBinary(RequestSignature.CREATE_ROOM, { name: 'test room' })
@@ -22,12 +23,27 @@ export default function Home() {
     socket?.send(msg);
   }
 
+  async function leaveRoom() {
+    const msg = toBinary(RequestSignature.LEAVE_ROOM, {
+      room_id: roomId,
+      player_id: playerId
+    })
+    socket?.send(msg);
+  }
+
   useEffect(() => {
     if (!socket || isConnecting) return
     socket.onmessage = async (event: MessageEvent<Blob>) => {
-      const data = await fromBinary(event)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const [signature, data] = await fromBinary<any>(event)
+      if (signature == ResponseSignature.JOIN_ROOM_SUCCESS) {
+        setPLayerId(data.player_id)
+        console.log({ playerId });
+      }
       setMessages(prevMessages => [...prevMessages, JSON.stringify(data)]);
     }
+    socket.onclose = () => leaveRoom()
+
   }, [socket, isConnecting])
 
   return (
@@ -38,7 +54,7 @@ export default function Home() {
             const msg = toBinary(RequestSignature.PING, { ping: true })
             socket?.send(msg);
           }}>
-          join
+          ping
         </button>
       </div>
       {/*  */}
@@ -63,6 +79,14 @@ export default function Home() {
         </button>
         <input type="text" placeholder='room id...' onChange={e => setRoomId(e.target.value)} />
       </div>
+      {/*  */}
+      <div>
+        <button
+          onClick={leaveRoom}>
+          leave room
+        </button>
+      </div>
+      {/*  */}
       {/*  */}
       <div>
         {/*  */}
