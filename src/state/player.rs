@@ -1,16 +1,20 @@
-use std::net::TcpStream;
+use std::sync::Arc;
 
 use serde::Serialize;
-use tokio_tungstenite::tungstenite::WebSocket;
+use tokio::{net::TcpStream, sync::Mutex};
+use tokio_tungstenite::tungstenite::Message;
 use uuid::Uuid;
 
+pub type WebSocket =
+    futures_util::stream::SplitSink<tokio_tungstenite::WebSocketStream<TcpStream>, Message>;
+
+#[allow(dead_code)]
 #[derive(Debug, Serialize)]
 pub struct Player {
-    #[allow(dead_code)]
     #[serde(skip)]
     pub id: Uuid,
-    // #[serde(skip)]
-    // pub session: WebSocket<TcpStream>,
+    #[serde(skip)]
+    pub session: Arc<Mutex<WebSocket>>,
     pub display_name: String,
 }
 

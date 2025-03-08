@@ -64,8 +64,8 @@ const SIGNATURES = {
 // });
 
 ws.on('open', function open() {
-    const room = '21f1bb80-7ac3-4e8f-9a01-03abae19c74e'
-    const player = 'e10221b3-f368-4efd-9cb3-35de4fdd3733'
+    const room = '796d0966-29f6-453b-9ffd-c526d4448c48'
+    const player = '81c2efa9-a9d8-427d-8899-68550bd7f81e'
     function createRoom() {
         const now = Date.now()
         const data = { name: `my test room ${now}` };

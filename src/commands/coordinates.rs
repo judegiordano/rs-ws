@@ -1,7 +1,12 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
+use std::sync::Arc;
+use tokio::sync::Mutex;
 
-use crate::responses::{Response, ToResponse};
+use crate::{
+    responses::{Response, ToResponse},
+    state::player::WebSocket,
+};
 
 use super::MessageHandler;
 
@@ -19,7 +24,7 @@ pub struct CoordinatesOk {
 impl ToResponse for CoordinatesOk {}
 
 impl MessageHandler for Coordinates {
-    async fn response_handler(data: &[u8]) -> Result<Response> {
+    async fn response_handler(data: &[u8], _: Arc<Mutex<WebSocket>>) -> Result<Response> {
         let response = Self::parse_from_slice(data)?;
         tracing::debug!("[COORDINATES]: [{:?}]", response);
         Ok(Response::CoordinatesOk(CoordinatesOk { ok: true }))

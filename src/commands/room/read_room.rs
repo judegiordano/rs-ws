@@ -1,12 +1,13 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
-use std::str::FromStr;
+use std::{str::FromStr, sync::Arc};
+use tokio::sync::Mutex;
 use uuid::Uuid;
 
 use crate::{
     commands::MessageHandler,
     responses::{error_message::ErrorMessage, Response},
-    state::session::STATE,
+    state::{player::WebSocket, session::STATE},
 };
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -16,7 +17,7 @@ pub struct ReadRoom {
 }
 
 impl MessageHandler for ReadRoom {
-    async fn response_handler(data: &[u8]) -> Result<Response> {
+    async fn response_handler(data: &[u8], _: Arc<Mutex<WebSocket>>) -> Result<Response> {
         let data = Self::parse_from_slice(data)?;
         tracing::debug!("[READ ROOM]: [{:?}]", data);
         let state = STATE.lock().await;
@@ -31,7 +32,7 @@ impl MessageHandler for ReadRoom {
                 message: format!("you do not have access to this room"),
             }));
         }
-        tracing::debug!("[ROOM {id}]: {:#?}", room);
+        tracing::debug!("[ROOM]: {:#?}", room);
         Ok(Response::ReadRoomSuccess(room.sanitize()))
     }
 }

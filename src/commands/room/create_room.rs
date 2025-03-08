@@ -1,12 +1,13 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, sync::Arc};
+use tokio::sync::Mutex;
 use uuid::Uuid;
 
 use crate::{
     commands::{room::response::CreateRoomSuccess, MessageHandler},
     responses::Response,
-    state::{room::Room, session::STATE},
+    state::{player::WebSocket, room::Room, session::STATE},
 };
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -15,7 +16,7 @@ pub struct CreateRoom {
 }
 
 impl MessageHandler for CreateRoom {
-    async fn response_handler(data: &[u8]) -> Result<Response> {
+    async fn response_handler(data: &[u8], _: Arc<Mutex<WebSocket>>) -> Result<Response> {
         let data = Self::parse_from_slice(data)?;
         tracing::debug!("[CREATE ROOM]: [{:?}]", data);
         // TODO: check if room exists;

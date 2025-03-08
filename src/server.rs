@@ -1,6 +1,9 @@
 use futures_util::{SinkExt, StreamExt};
-use std::net::SocketAddr;
-use tokio::net::{TcpListener, TcpStream};
+use std::{net::SocketAddr, sync::Arc};
+use tokio::{
+    net::{TcpListener, TcpStream},
+    sync::Mutex,
+};
 use tokio_tungstenite::{
     accept_async,
     tungstenite::{Error, Message, Result},
@@ -18,25 +21,33 @@ use crate::{
     message_bytes::MessageBytes,
     message_type::RequestType,
     responses::{error_message::ErrorMessage, Response},
+    state::player::WebSocket,
 };
 
-async fn message_handler(msg: Message) -> Result<Message> {
+async fn message_handler(
+    msg: Message,
+    responder: Arc<Mutex<WebSocket>>,
+    receiver: Arc<Mutex<WebSocket>>,
+) -> Result<()> {
     let msg_bytes = MessageBytes(msg.into_data());
     let msg_type = msg_bytes.message_type();
     let data = msg_bytes.message_body();
     let handler = match msg_type {
-        RequestType::Coordinates => Coordinates::response_handler(data).await,
-        RequestType::Ping => Ping::response_handler(data).await,
+        RequestType::Coordinates => Coordinates::response_handler(data, receiver).await,
+        RequestType::Ping => Ping::response_handler(data, receiver).await,
         // rooms
-        RequestType::JoinRoom => JoinRoom::response_handler(data).await,
-        RequestType::CreateRoom => CreateRoom::response_handler(data).await,
-        RequestType::ReadRoom => ReadRoom::response_handler(data).await,
+        RequestType::JoinRoom => JoinRoom::response_handler(data, receiver).await,
+        RequestType::CreateRoom => CreateRoom::response_handler(data, receiver).await,
+        RequestType::ReadRoom => ReadRoom::response_handler(data, receiver).await,
         // unhandled
-        _ => ErrorMessage::response_handler(data).await,
+        _ => ErrorMessage::response_handler(data, receiver).await,
     };
     // TODO: handle
     let buffer = match handler {
-        Ok(response) => response.build_response(),
+        Ok(response) => {
+            tracing::info!("[RESPONSE]: {:?}", response);
+            response.build_response()
+        }
         Err(err) => {
             // TODO: refactor
             tracing::error!("[{:?}]: [{:?}]", msg_type, data);
@@ -47,16 +58,19 @@ async fn message_handler(msg: Message) -> Result<Message> {
             Response::Error(err).build_response()
         }
     };
-    Ok(Message::binary(buffer))
+    let msg = Message::binary(buffer);
+    responder.lock().await.send(msg).await?;
+    Ok(())
 }
 
 async fn handle_connection(_: SocketAddr, stream: TcpStream) -> Result<()> {
-    let mut ws_stream = accept_async(stream).await?;
-    while let Some(msg) = ws_stream.next().await {
+    let ws_stream = accept_async(stream).await?;
+    let (sender, mut receiver) = ws_stream.split();
+    let sender = Arc::new(Mutex::new(sender));
+    while let Some(msg) = receiver.next().await {
         let msg = msg?;
         if msg.is_binary() {
-            let resp = message_handler(msg).await?;
-            ws_stream.send(resp).await?;
+            message_handler(msg, sender.clone(), sender.clone()).await?;
         }
     }
     Ok(())

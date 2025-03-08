@@ -1,7 +1,9 @@
 use anyhow::Result;
 use serde::{de::DeserializeOwned, Serialize};
+use std::sync::Arc;
+use tokio::sync::Mutex;
 
-use crate::responses::Response;
+use crate::{responses::Response, state::player::WebSocket};
 
 pub mod coordinates;
 pub mod health;
@@ -12,5 +14,5 @@ pub trait MessageHandler: Serialize + DeserializeOwned {
         serde_json::from_slice::<Self>(slice)
     }
 
-    async fn response_handler(data: &[u8]) -> Result<Response>;
+    async fn response_handler(data: &[u8], receiver: Arc<Mutex<WebSocket>>) -> Result<Response>;
 }

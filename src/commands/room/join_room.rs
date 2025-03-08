@@ -1,12 +1,16 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
-use std::str::FromStr;
+use std::{str::FromStr, sync::Arc};
+use tokio::sync::Mutex;
 use uuid::Uuid;
 
 use crate::{
     commands::{room::response::JoinRoomSuccess, MessageHandler},
     responses::Response,
-    state::{player::Player, session::STATE},
+    state::{
+        player::{Player, WebSocket},
+        session::STATE,
+    },
 };
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -16,7 +20,7 @@ pub struct JoinRoom {
 }
 
 impl MessageHandler for JoinRoom {
-    async fn response_handler(data: &[u8]) -> Result<Response> {
+    async fn response_handler(data: &[u8], receiver: Arc<Mutex<WebSocket>>) -> Result<Response> {
         let data = Self::parse_from_slice(data)?;
         tracing::debug!("[JOIN ROOM]: [{:?}]", data);
         let mut state = STATE.lock().await;
@@ -33,10 +37,11 @@ impl MessageHandler for JoinRoom {
             player_id,
             Player {
                 id: room_id,
+                session: receiver.clone(),
                 display_name: data.display_name,
             },
         );
-        tracing::debug!("[ROOM {room_id}]: {:#?}", room);
+        tracing::debug!("[ROOM]: {:#?}", room);
         Ok(Response::JoinRoomSuccess(JoinRoomSuccess { player_id }))
     }
 }
