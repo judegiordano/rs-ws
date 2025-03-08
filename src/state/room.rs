@@ -59,7 +59,7 @@ impl Room {
             match client.send(msg.clone()).await {
                 Ok(_) => (),
                 Err(err) => {
-                    tracing::error!("[BROADCAST ERROR]: {:?}", err);
+                    tracing::error!("[BROADCAST ERROR]: {:?}", err.to_string());
                 }
             }
         }

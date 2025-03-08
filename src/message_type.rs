@@ -2,12 +2,11 @@ use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
 pub enum RequestType {
-    Coordinates = 0,
-    Ping = 1,
+    Ping = 0,
     // rooms
+    CreateRoom = 1,
     JoinRoom = 2,
-    CreateRoom = 3,
-    ReadRoom = 4,
+    ReadRoom = 3,
     //
     Unhandled,
 }
@@ -15,11 +14,10 @@ pub enum RequestType {
 impl RequestType {
     pub fn from_byte(byte: u8) -> Self {
         match byte {
-            0 => Self::Coordinates,
-            1 => Self::Ping,
+            0 => Self::Ping,
+            1 => Self::CreateRoom,
             2 => Self::JoinRoom,
-            3 => Self::CreateRoom,
-            4 => Self::ReadRoom,
+            3 => Self::ReadRoom,
             //
             _ => Self::Unhandled,
         }

@@ -13,7 +13,6 @@ use tracing_subscriber::FmtSubscriber;
 
 use crate::{
     commands::{
-        coordinates::Coordinates,
         health::ping::Ping,
         room::{create_room::CreateRoom, join_room::JoinRoom, read_room::ReadRoom},
         MessageHandler,
@@ -33,7 +32,6 @@ async fn message_handler(
     let msg_type = msg_bytes.message_type();
     let data = msg_bytes.message_body();
     let handler = match msg_type {
-        RequestType::Coordinates => Coordinates::response_handler(data, receiver).await,
         RequestType::Ping => Ping::response_handler(data, receiver).await,
         // rooms
         RequestType::JoinRoom => JoinRoom::response_handler(data, receiver).await,
